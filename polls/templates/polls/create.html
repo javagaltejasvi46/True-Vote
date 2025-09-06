@@ -1,0 +1,118 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Admin Dashboard - Create Election{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Create New Election</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" class="create-election-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="question" class="form-label">Election Title/Question</label>
+                                <input type="text" class="form-control" id="question" name="question" placeholder="e.g., Presidential Election 2025" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="department" class="form-label">Department/Type</label>
+                                <select class="form-select" id="department" name="department" required>
+                                    <option value="" selected disabled>Select Department/Type</option>
+                                    <option value="Cultural">Cultural</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="President">President</option>
+                                    <option value="Vice President">Vice President</option>
+                                    <option value="Social">Social</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="datetime-local" class="form-control" id="start_date" name="start_date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h4 class="mb-0">Select Candidates</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if candidates %}
+                                <div class="row">
+                                    {% for candidate in candidates %}
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="candidates" value="{{ candidate.id }}" id="candidate-{{ candidate.id }}">
+                                                <label class="form-check-label" for="candidate-{{ candidate.id }}">
+                                                    {{ candidate.name }} - {{ candidate.position }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="alert alert-warning">No candidates available. Add candidates first.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create Election</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add New Candidate Section -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h2 class="mb-0">Add New Candidate</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'polls:add_candidate' %}" class="create-election-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="candidate_name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="candidate_name" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <label for="candidate_age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="candidate_age" name="age" required min="18">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="candidate_sex" class="form-label">Gender</label>
+                                <select class="form-select" id="candidate_sex" name="sex" required>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="candidacy_position" class="form-label">Position</label>
+                                <input type="text" class="form-control" id="candidacy_position" name="position" required placeholder="e.g., President, Secretary, etc.">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Add Candidate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,200 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}{{ poll.title }} - Statistics{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'polls:index' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Elections List
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>{{ poll.title }} - Statistics
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center bg-primary rounded-circle me-3" style="width: 48px; height: 48px;">
+                                <i class="fas fa-building text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">Department</h6>
+                                <p class="mb-0 fs-5">{{ poll.department }}</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center bg-primary rounded-circle me-3" style="width: 48px; height: 48px;">
+                                <i class="fas fa-calendar-day text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">Election Date</h6>
+                                <p class="mb-0 fs-5">{{ poll.pub_date|date:"F j, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center bg-success rounded-circle me-3" style="width: 48px; height: 48px;">
+                                <i class="fas fa-vote-yea text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">Total Votes Cast</h6>
+                                <p class="mb-0 fs-1 fw-bold counter">{{ total_votes }}</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center bg-info rounded-circle me-3" style="width: 48px; height: 48px;">
+                                <i class="fas fa-users text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-0">Voter Participation</h6>
+                                <p class="mb-0 fs-5">{{ participation_rate }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <!-- Election Results Chart -->
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <h3 class="mb-4 department-title">Voting Results</h3>
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="results-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vote Timeline -->
+                {% if user.is_staff and vote_timeline %}
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <h3 class="mb-4 department-title">Recent Voting Activity</h3>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Voter</th>
+                                                <th>Candidate</th>
+                                                <th>Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for vote in vote_timeline %}
+                                            <tr>
+                                                <td>{{ vote.voter.name }}</td>
+                                                <td>{{ vote.choice.candidate.name }}</td>
+                                                <td>{{ vote.voted_at|date:"M d, Y H:i:s" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup chart
+    createResultsChart();
+    
+    // Create results chart for the election
+    function createResultsChart() {
+        const ctx = document.getElementById('results-chart').getContext('2d');
+        const chartData = {{ chart_data|safe }};
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Votes',
+                    data: chartData.votes,
+                    backgroundColor: generateGradientColors(chartData.labels.length),
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw} votes (${chartData.percentages[context.dataIndex]}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Generate gradient colors for chart
+    function generateGradientColors(count) {
+        const colors = [];
+        const baseColors = [
+            'rgba(33, 150, 243, 0.8)',   // Blue
+            'rgba(76, 175, 80, 0.8)',    // Green
+            'rgba(255, 193, 7, 0.8)',    // Amber
+            'rgba(156, 39, 176, 0.8)',   // Purple
+            'rgba(0, 188, 212, 0.8)',    // Cyan
+            'rgba(233, 30, 99, 0.8)',    // Pink
+            'rgba(255, 87, 34, 0.8)',    // Deep Orange
+            'rgba(63, 81, 181, 0.8)'     // Indigo
+        ];
+        
+        for (let i = 0; i < count; i++) {
+            colors.push(baseColors[i % baseColors.length]);
+        }
+        
+        return colors;
+    }
+});
+</script>
+{% endblock %} 

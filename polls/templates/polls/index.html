@@ -1,0 +1,81 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Active Elections{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-vote-yea me-2"></i>Active Elections</h1>
+        <div>
+            <a href="{% url 'polls:past_elections' %}" class="btn btn-secondary me-2">
+                <i class="fas fa-history me-1"></i> Past Elections
+            </a>
+            {% if user.is_staff %}
+                <a href="{% url 'polls:create' %}" class="btn btn-success">
+                    <i class="fas fa-plus-circle me-1"></i> Create New Election
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if latest_poll_list %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for poll in latest_poll_list %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span class="badge {% if poll.is_currently_active %}bg-success{% elif poll.is_active %}bg-warning text-dark{% else %}bg-danger{% endif %} float-end">
+                            {% if poll.is_currently_active %}
+                                <i class="fas fa-check-circle me-1"></i> Active Today
+                            {% elif poll.is_active %}
+                                <i class="fas fa-calendar me-1"></i> Upcoming
+                            {% else %}
+                                <i class="fas fa-times-circle me-1"></i> Inactive
+                            {% endif %}
+                        </span>
+                        <h5 class="card-title mb-0">{{ poll.title }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <i class="fas fa-building me-1"></i> <strong>Department:</strong> {{ poll.department }}
+                            <br>
+                            <i class="fas fa-calendar-plus me-1"></i> <strong>Election Date:</strong> {{ poll.pub_date|date:"F j, Y" }}
+                        </p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between flex-wrap">
+                        <div class="mb-2">
+                            <a href="{% url 'polls:detail' poll.id %}" class="btn btn-primary btn-sm">
+                                {% if poll.is_currently_active %}
+                                    <i class="fas fa-vote-yea me-1"></i> Vote
+                                {% else %}
+                                    <i class="fas fa-eye me-1"></i> View Details
+                                {% endif %}
+                            </a>
+                            <a href="{% url 'polls:results' poll.id %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-chart-bar me-1"></i> Results
+                            </a>
+                            <a href="{% url 'polls:poll_stats' poll.id %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-chart-pie me-1"></i> View Statistics
+                            </a>
+                        </div>
+                        {% if user.is_staff %}
+                            <a href="{% url 'polls:delete_poll' poll.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt me-1"></i> Delete
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        No elections are available at the moment.
+        {% if user.is_staff %}
+            <a href="{% url 'polls:create' %}" class="alert-link">Create one now</a>.
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %} 

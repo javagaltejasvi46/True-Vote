@@ -1,0 +1,82 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}{{ poll.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h1 class="mb-0">{{ poll.title }}</h1>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p class="text-muted">
+                        Election Date: {{ poll.pub_date|date:"F j, Y" }}
+                    </p>
+                    <div>
+                        {% if poll.is_currently_active %}
+                            <span class="badge bg-success">Active Today - Voting Open</span>
+                        {% elif poll.is_active %}
+                            <span class="badge bg-warning text-dark">Active (Not Today's Election)</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive Election</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if error_message %}
+                    <div class="alert alert-danger">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Only show the voting form if the election is active for today -->
+                {% if poll.is_currently_active %}
+                    {% if poll.choices.all %}
+                        <form action="{% url 'polls:vote' poll.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="list-group mb-3">
+                                {% for choice in poll.choices.all %}
+                                    <label class="list-group-item">
+                                        <input class="form-check-input me-1" type="radio" name="choice" value="{{ choice.id }}">
+                                        <strong>{{ choice.candidate.name }}</strong> - {{ choice.candidate.position }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Vote</button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            There are no candidates available for this election. Contact an administrator.
+                        </div>
+                    {% endif %}
+                {% elif poll.is_active %}
+                    <div class="alert alert-warning">
+                        This election is active but not scheduled for today. Voting is only allowed on the election date ({{ poll.pub_date|date:"F j, Y" }}).
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        This election is not currently active.
+                    </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="{% url 'polls:results' poll.id %}" class="btn btn-secondary">View Results</a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'polls:delete_poll' poll.id %}" class="btn btn-danger">Delete Election</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

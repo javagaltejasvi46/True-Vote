@@ -1,0 +1,236 @@
+Project Overview
+==============
+This is an Online Voting System built using Django, designed to manage and conduct elections within an educational institution.
+The system supports multiple departments and branches, allowing for both department-specific and institution-wide elections.
+Users can register as either voters or candidates, with candidates being able to run for specific positions within their departments.
+the system ensures secure voting by implementing one-vote-per-user policy and maintaining an audit trail of all voting activities.
+Administrators have the ability to create and manage elections, add candidates, and view detailed voting statistics. 
+The system also includes features for tracking voter participation, managing election timelines, and generating comprehensive reports. 
+All voting activities are timestamped and can be monitored by administrators, while regular users can only view the election results after voting.
+
+Setup and Running Instructions
+============================
+1. Prerequisites:
+   - Python 3.8 or higher
+   - pip (Python package installer)
+   - Git (optional, for cloning the repository)
+
+2. Installation Steps:
+   ```bash
+   # Clone the repository (if using Git)
+   git clone <repository-url>
+   cd dbms-mini-proj
+
+   # Create and activate virtual environment
+   python -m venv venv
+   
+   # On Windows
+   venv\Scripts\activate
+   
+   # On Linux/Mac
+   source venv/bin/activate
+
+   # Install dependencies
+   pip install -r requirements.txt
+
+   # Run migrations
+   python manage.py makemigrations
+   python manage.py migrate
+
+   # Create a superuser (admin)
+   python manage.py createsuperuser
+   ```
+
+3. Running the Project:
+   ```bash
+   # Start the development server
+   python manage.py runserver
+   ```
+
+4. Accessing the Application:
+   - Open your web browser and go to: http://127.0.0.1:8000/
+   - Admin interface: http://127.0.0.1:8000/admin
+   - Login with the superuser credentials created in step 2
+
+5. Initial Setup (After First Login):
+   - Create departments and branches through the admin interface
+   - Add candidates using the admin interface or the application's candidate registration
+   - Create elections and assign candidates
+   - Users can register as voters and participate in active elections
+
+6. Development Commands:
+   ```bash
+   # Create new migrations after model changes
+   python manage.py makemigrations
+
+   # Apply migrations
+   python manage.py migrate
+
+   # Create a new app
+   python manage.py startapp <app_name>
+
+   # Run tests
+   python manage.py test
+
+   # Collect static files
+   python manage.py collectstatic
+   ```
+
+7. Troubleshooting:
+   - If you encounter database errors, try:
+     ```bash
+     python manage.py migrate --run-syncdb
+     ```
+   - For static files issues:
+     ```bash
+     python manage.py collectstatic --clear
+     ```
+   - To reset the database (if needed):
+     ```bash
+     python manage.py flush
+     ```
+
+Database Schema for Online Voting System
+=====================================
+
+1. User (Django's built-in User model)
+-------------------------------------
+- Primary key: id (AutoField)
+- Fields:
+  * username (CharField, max_length=150, unique)
+  * password (CharField, max_length=128)
+  * email (EmailField, max_length=254)
+  * first_name (CharField, max_length=150)
+  * last_name (CharField, max_length=150)
+  * is_staff (BooleanField, default=False)
+  * is_active (BooleanField, default=True)
+  * date_joined (DateTimeField)
+  * last_login (DateTimeField)
+
+2. Branch
+---------
+- Primary key: id (AutoField)
+- Fields:
+  * name (CharField, max_length=100)
+
+3. Department
+------------
+- Primary key: id (AutoField)
+- Fields:
+  * name (CharField, max_length=100)
+
+4. Voter
+--------
+- Primary key: id (AutoField)
+- Fields:
+  * user (OneToOneField to User)
+  * name (CharField, max_length=100)
+  * age (IntegerField, nullable)
+  * branch (ForeignKey to Branch, nullable)
+  * srn (CharField, max_length=20, unique, nullable)
+  * sex (CharField, max_length=1, choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
+  * is_voter (BooleanField, default=True)
+
+5. Candidate
+-----------
+- Primary key: id (AutoField)
+- Fields:
+  * user (OneToOneField to User)
+  * name (CharField, max_length=100)
+  * age (IntegerField)
+  * sex (CharField, max_length=1, choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
+  * branch (ForeignKey to Branch, nullable)
+  * department (ForeignKey to Department, nullable)
+  * position (CharField, max_length=100, default='Candidate')
+  * is_candidate (BooleanField, default=True)
+
+6. Poll (Election)
+-----------------
+- Primary key: id (AutoField)
+- Fields:
+  * question (CharField, max_length=200)
+  * pub_date (DateTimeField, default=timezone.now)
+  * is_active (BooleanField, default=True)
+  * department (ForeignKey to Department, nullable)
+  * branch (ForeignKey to Branch, nullable)
+
+7. Choice
+---------
+- Primary key: id (AutoField)
+- Fields:
+  * poll (ForeignKey to Poll)
+  * candidate (ForeignKey to Candidate, nullable)
+  * votes (IntegerField, default=0)
+
+8. Vote
+-------
+- Primary key: id (AutoField)
+- Fields:
+  * voter (ForeignKey to Voter)
+  * poll (ForeignKey to Poll)
+  * choice (ForeignKey to Choice)
+  * voted_at (DateTimeField, auto_now_add=True)
+- Constraints:
+  * Unique together: (voter, poll) - Ensures one vote per voter per poll
+
+Relationships:
+-------------
+1. User-Voter: One-to-One relationship
+   - Each user can have one voter profile
+   - Each voter profile belongs to one user
+
+2. User-Candidate: One-to-One relationship
+   - Each user can have one candidate profile
+   - Each candidate profile belongs to one user
+
+3. Poll-Choice: One-to-Many relationship
+   - Each poll can have multiple choices
+   - Each choice belongs to one poll
+
+4. Choice-Candidate: One-to-One relationship
+   - Each choice can have one candidate
+   - Each candidate can be in multiple choices
+
+5. Vote-Voter: Many-to-One relationship
+   - Each voter can have multiple votes
+   - Each vote belongs to one voter
+
+6. Vote-Poll: Many-to-One relationship
+   - Each poll can have multiple votes
+   - Each vote belongs to one poll
+
+7. Vote-Choice: Many-to-One relationship
+   - Each choice can have multiple votes
+   - Each vote belongs to one choice
+
+8. Branch/Department Relationships:
+   - Voters can belong to a branch
+   - Candidates can belong to a branch and department
+   - Polls can be associated with a branch and department
+
+Key Features:
+-----------
+1. User Authentication and Authorization
+   - Built-in Django User model for authentication
+   - Staff status for admin privileges
+   - Active status for account management
+
+2. Role-based Access
+   - Voter profiles for regular users
+   - Candidate profiles for election candidates
+   - Staff status for administrators
+
+3. Election Management
+   - Active/Inactive status for polls
+   - Department and branch organization
+   - Timestamp tracking for votes
+
+4. Data Integrity
+   - Unique constraints on voter-poll combinations
+   - Required fields for essential information
+   - Proper foreign key relationships
+
+5. Audit Trail
+   - Vote timestamps
+   - User activity tracking
+   - Election status tracking 

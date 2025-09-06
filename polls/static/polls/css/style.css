@@ -1,0 +1,572 @@
+/* Root Variables and Bootstrap Overrides */
+:root {
+    --bs-font-sans-serif: 'Open Sans', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    --bs-body-font-family: 'Open Sans', sans-serif;
+}
+
+/* Import Google Fonts - no longer needed as it's imported in base.html */
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap'); */
+
+/* Base Styles */
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    background-image: url('/static/polls/images/abstract-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+    min-height: 100vh;
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+}
+
+/* Container */
+.container {
+    max-width: 1140px;
+}
+
+/* Navbar */
+.navbar {
+    background-color: rgba(33, 33, 33, 0.95) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Cards */
+.card {
+    background-color: rgba(33, 33, 33, 0.75);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.25rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Login Card Styles */
+.login-card {
+    background-color: rgba(33, 33, 33, 0.85);
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 30px rgba(33, 150, 243, 0.1);
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.login-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 50px rgba(33, 150, 243, 0.2);
+    transform: translateY(-10px) rotateX(5deg);
+}
+
+.login-card .card-header {
+    background: linear-gradient(135deg, #369ef4, #2465c7);
+    border-bottom: none;
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+}
+
+.login-card .card-header:before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.05);
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+.login-card .input-group-text {
+    background-color: rgba(29, 149, 247, 0.2);
+    color: #2196F3;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-card .btn-primary {
+    background: linear-gradient(135deg, #2196F3, #0D47A1);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.login-card .btn-primary:hover {
+    background: linear-gradient(135deg, #0D47A1, #2196F3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+}
+
+/* Stats Page Styles */
+.stats-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stats-card:hover {
+    transform: translateY(-7px) scale(1.02);
+}
+
+.stats-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-card p {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #2196F3, #2e7bee);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #4CAF50, #1B5E20);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #00BCD4, #006064);
+}
+
+.department-title {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.department-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #2196F3, transparent);
+}
+
+.poll-chart-container {
+    transition: all 0.3s ease;
+}
+
+.poll-chart-container:hover {
+    transform: translateY(-5px);
+}
+
+.poll-chart-container .card {
+    border-radius: 10px;
+    background-color: rgba(33, 33, 33, 0.85);
+}
+
+.poll-chart-container .card-header {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+.poll-chart-container .card-header h4 {
+    margin-bottom: 0.25rem;
+    color: #ffffff;
+}
+
+.counter {
+    animation: countUp 2s ease-out forwards;
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Card Text */
+.card-title, .card-text, .card-header h5, .card p, .card strong {
+    color: #ffffff !important;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(33, 150, 243, 0.5);
+    color: #ffffff;
+    box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
+}
+
+/* Form Labels */
+label, .form-label, .form-check-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Select Options */
+option {
+    background-color: #212121;
+    color: #ffffff;
+}
+
+/* Placeholder text color */
+::placeholder {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+:-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+::-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #2196F3;
+    border-color: #2196F3;
+}
+
+.btn-primary:hover {
+    background-color: #1976D2;
+    border-color: #1976D2;
+}
+
+.btn-secondary {
+    background-color: #546e7a;
+    border-color: #546e7a;
+}
+
+.btn-secondary:hover {
+    background-color: #455a64;
+    border-color: #455a64;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    border-color: #f44336;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+.btn-success {
+    background-color: #4caf50;
+    border-color: #4caf50;
+}
+
+.btn-success:hover {
+    background-color: #388e3c;
+    border-color: #388e3c;
+}
+
+/* List Group */
+.list-group-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    margin-bottom: 5px;
+    border-radius: 4px !important;
+}
+
+.list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Badge */
+.badge {
+    font-weight: 400;
+    padding: 0.5em 0.8em;
+    border-radius: 4px;
+}
+
+/* Progress Bar */
+.progress {
+    height: 25px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-bar {
+    background-color: #2196F3;
+    line-height: 25px;
+    font-weight: 500;
+}
+
+/* Alerts */
+.alert {
+    background-color: rgba(33, 33, 33, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    backdrop-filter: blur(5px);
+}
+
+.alert-danger {
+    background-color: rgba(244, 67, 54, 0.2);
+}
+
+.alert-success {
+    background-color: rgba(76, 175, 80, 0.2);
+}
+
+.alert-warning {
+    background-color: rgba(255, 152, 0, 0.2);
+    color: #ffffff;
+}
+
+.alert-info {
+    background-color: rgba(33, 150, 243, 0.2);
+}
+
+/* Form Check Input */
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-check-input:checked {
+    background-color: #2196F3;
+    border-color: #2196F3;
+}
+
+/* Text Muted */
+.text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Links */
+a {
+    color: #2196F3;
+}
+
+a:hover {
+    color: #64b5f6;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    background-color: rgba(33, 33, 33, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item {
+    color: #ffffff;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.2rem;
+    }
+    
+    body {
+        padding-top: 5rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card, .alert {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Card Title and Headings */
+h1, h2, h3, h4, h5, h6, .card-title {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+}
+
+/* Buttons with Open Sans */
+.btn {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.btn-sm {
+    font-weight: 500;
+}
+
+/* Badges with Open Sans */
+.badge {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75em;
+}
+
+/* Additional Typography Styles */
+.fw-light {
+    font-weight: 300 !important;
+}
+
+.fw-normal {
+    font-weight: 400 !important;
+}
+
+.fw-medium {
+    font-weight: 500 !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fw-extrabold {
+    font-weight: 800 !important;
+}
+
+/* =============================================== */
+/* CREATE ELECTION PAGE STYLES - CUSTOMIZE COLORS HERE */
+/* =============================================== */
+
+/* Create Election Card Header - Main blue header with "Create New Election" text */
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #62a1e8, #5390d0) !important;
+    border-bottom: none;
+}
+
+/* Create Election Secondary Card Headers - "Select Candidates" and "Add New Candidate" sections */
+.card-header.bg-secondary {
+    background: linear-gradient(135deg, #546e7a, #455a64) !important;
+    border-bottom: none;
+}
+
+/* Create Election Form Controls - Text Inputs, Selects, Checkboxes */
+.create-election-form .form-control,
+.create-election-form .form-select {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Create Election Form Controls Focus States */
+.create-election-form .form-control:focus,
+.create-election-form .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(33, 150, 243, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
+}
+
+/* Create Election Checkboxes */
+.create-election-form .form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.create-election-form .form-check-input:checked {
+    background-color: #2196F3;
+    border-color: #2196F3;
+}
+
+/* Create Election Submit Button */
+.create-election-form .btn-primary {
+    background: linear-gradient(135deg, #2196F3, #0d52a1);
+    border: none;
+    font-weight: 600;
+}
+
+.create-election-form .btn-primary:hover {
+    background: linear-gradient(135deg, #0D47A1, #2196F3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+}
+
+/* Add Candidate Button */
+.create-election-form .btn-secondary {
+    background: linear-gradient(135deg, #546e7a, #455a64);
+    border: none;
+    font-weight: 600;
+}
+
+.create-election-form .btn-secondary:hover {
+    background: linear-gradient(135deg, #455a64, #546e7a);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(84, 110, 122, 0.4);
+}
+/* =============================================== */
+/* END CREATE ELECTION PAGE STYLES */
+/* =============================================== */ 

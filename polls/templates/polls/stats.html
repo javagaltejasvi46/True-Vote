@@ -1,0 +1,286 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Election Statistics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Election Statistics</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This page shows aggregated statistics across all elections. For detailed statistics on a specific election, 
+                    go to the home page and click the <strong>View Statistics</strong> button on any election card.
+                </div>
+                
+                <p class="text-muted mb-4">
+                    This dashboard displays voting statistics across different departments and elections.
+                </p>
+                
+                <!-- Department Filter -->
+                <div class="mb-4">
+                    <label for="departmentFilter" class="form-label">Filter by Department</label>
+                    <select class="form-select" id="departmentFilter">
+                        <option value="all" selected>All Departments</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept }}">{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Overall Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-gradient-primary stats-card">
+                            <div class="card-body text-center">
+                                <h3 class="counter">{{ total_elections }}</h3>
+                                <p class="card-text">Total Elections</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-gradient-success stats-card">
+                            <div class="card-body text-center">
+                                <h3 class="counter">{{ total_votes }}</h3>
+                                <p class="card-text">Total Votes Cast</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-gradient-info stats-card">
+                            <div class="card-body text-center">
+                                <h3 class="counter">{{ total_candidates }}</h3>
+                                <p class="card-text">Total Candidates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Departmental Charts Section -->
+                <div class="department-charts mt-5">
+                    {% for dept, polls in dept_polls.items %}
+                        <div class="department-section mb-5" data-department="{{ dept }}">
+                            <h3 class="department-title mb-4">{{ dept }} Department</h3>
+                            
+                            {% for poll in polls %}
+                                <div class="poll-chart-container mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4>{{ poll.title }}</h4>
+                                            <p class="text-muted mb-0">Election Date: {{ poll.pub_date|date:"F j, Y" }}</p>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="chart-{{ poll.id }}" class="poll-chart" height="250"></canvas>
+                                        </div>
+                                        <div class="card-footer">
+                                            <a href="{% url 'polls:poll_stats' poll.id %}" class="btn btn-info">
+                                                <i class="fas fa-chart-pie me-1"></i> View Detailed Statistics
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="alert alert-info">
+                                    No elections found for this department.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Voter Participation Chart -->
+                <div class="mt-5">
+                    <h3 class="mb-4">Voter Participation by Department</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="participation-chart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up dynamic charts
+    setupCharts();
+    
+    // Setup department filter
+    const departmentFilter = document.getElementById('departmentFilter');
+    departmentFilter.addEventListener('change', function() {
+        filterDepartments(this.value);
+    });
+    
+    // Initialize charts
+    function setupCharts() {
+        // Create charts for each poll
+        {% for dept, polls in dept_polls.items %}
+            {% for poll in polls %}
+                createPollChart('chart-{{ poll.id }}', '{{ poll.title }}', {{ poll.chart_data|safe }});
+            {% endfor %}
+        {% endfor %}
+        
+        // Create participation chart
+        createParticipationChart('participation-chart', {{ participation_data|safe }});
+    }
+    
+    // Create bar chart for a poll
+    function createPollChart(canvasId, title, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Votes',
+                    data: data.votes,
+                    backgroundColor: generateGradientColors(data.labels.length),
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw} votes (${data.percentages[context.dataIndex]}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Create participation chart
+    function createParticipationChart(canvasId, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.departments,
+                datasets: [{
+                    label: 'Voter Participation',
+                    data: data.participation,
+                    backgroundColor: generateGradientColors(data.departments.length),
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw}% participation`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Filter departments 
+    function filterDepartments(department) {
+        const departmentSections = document.querySelectorAll('.department-section');
+        
+        if (department === 'all') {
+            departmentSections.forEach(section => {
+                section.style.display = 'block';
+            });
+        } else {
+            departmentSections.forEach(section => {
+                if (section.dataset.department === department) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+    }
+    
+    // Generate gradient colors for chart
+    function generateGradientColors(count) {
+        const colors = [];
+        const baseColors = [
+            'rgba(33, 150, 243, 0.8)',   // Blue
+            'rgba(76, 175, 80, 0.8)',    // Green
+            'rgba(255, 193, 7, 0.8)',    // Amber
+            'rgba(156, 39, 176, 0.8)',   // Purple
+            'rgba(0, 188, 212, 0.8)',    // Cyan
+            'rgba(233, 30, 99, 0.8)',    // Pink
+            'rgba(255, 87, 34, 0.8)',    // Deep Orange
+            'rgba(63, 81, 181, 0.8)'     // Indigo
+        ];
+        
+        for (let i = 0; i < count; i++) {
+            colors.push(baseColors[i % baseColors.length]);
+        }
+        
+        return colors;
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,52 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Results: {{ poll.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h1 class="mb-0">{{ poll.title }} - Results</h1>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Election Period: {{ poll.pub_date|date:"F j, Y, g:i a" }}
+                </p>
+
+                <div class="list-group mb-3">
+                    {% for choice in poll.choices.all %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span><strong>{{ choice.candidate.name }}</strong> - {{ choice.candidate.position }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ choice.votes }} vote{{ choice.votes|pluralize }}</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ choice.percentage }}%"
+                                     aria-valuenow="{{ choice.percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ choice.percentage|floatformat:1 }}%
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <div>
+                        {% if poll.is_currently_active %}
+                            <a href="{% url 'polls:detail' poll.id %}" class="btn btn-primary">Vote Again</a>
+                        {% endif %}
+                        <a href="{% url 'polls:index' %}" class="btn btn-secondary">Back to Elections</a>
+                    </div>
+                    {% if user.is_staff %}
+                        <a href="{% url 'polls:delete_poll' poll.id %}" class="btn btn-danger">Delete Election</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

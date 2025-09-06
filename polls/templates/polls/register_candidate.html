@@ -1,0 +1,14 @@
+{% extends 'polls/base.html' %}
+{% block title %}Register as Candidate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Register as Candidate</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Complete Registration</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 
