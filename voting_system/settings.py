@@ -139,4 +139,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Auth settings
 LOGIN_URL = 'polls:login'
 LOGIN_REDIRECT_URL = 'polls:index'
+LOGIN_REDIRECT_URL = 'polls:index'
 LOGOUT_REDIRECT_URL = 'polls:index'
+
+# Allow the app to be embedded in an iframe (required for Hugging Face Spaces)
+X_FRAME_OPTIONS = 'ALLOWALL'
+XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
