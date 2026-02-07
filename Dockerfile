@@ -13,7 +13,7 @@ WORKDIR $HOME/app
 COPY --chown=user . $HOME/app
 
 # permissions for start.sh
-RUN chmod +x start.sh
+RUN chmod +x start.sh && sed -i 's/\r$//' start.sh
 
 # Install requirements
 RUN pip install --no-cache-dir --upgrade pip && \
