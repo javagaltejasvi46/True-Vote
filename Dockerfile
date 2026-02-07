@@ -21,8 +21,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir gunicorn
 
 # Grant permissions for the database to be created/written
-RUN mkdir -p $HOME/app && chown -R user:user $HOME/app
-RUN chmod 777 $HOME/app
+# Ensure the user has full control over the app directory
+RUN chown -R user:user $HOME/app && chmod -R 777 $HOME/app
 
 # Collect static files
 RUN python manage.py collectstatic --no-input
