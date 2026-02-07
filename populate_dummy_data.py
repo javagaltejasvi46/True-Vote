@@ -2,11 +2,12 @@ import os
 import django
 import random
 from datetime import timedelta
-from django.utils import timezone
-from django.contrib.auth.models import User
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'voting_system.settings')
 django.setup()
+
+from django.utils import timezone
+from django.contrib.auth.models import User
 
 from polls.models import Poll, Choice, Candidate, Branch, Department
 
