@@ -75,5 +75,8 @@
 - **Voter Registration**: Verification required via SRN during signup.
 - **Voting**: Navigate to the homepage to see active elections.
 
+## Deployment
+For instructions on how to deploy this project to the web, please read [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ---
 *Maintained by Javagal Tejasvi*
