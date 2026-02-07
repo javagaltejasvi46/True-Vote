@@ -9,7 +9,13 @@ ENV HOME=/home/user \
 
 WORKDIR $HOME/app
 
+# Copy the current directory contents into the container at $HOME/app setting the owner to the user
 COPY --chown=user . $HOME/app
+
+# permissions for start.sh
+RUN chmod +x start.sh
+
+# Install requirements
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir gunicorn
@@ -23,5 +29,5 @@ RUN python manage.py collectstatic --no-input
 
 EXPOSE 7860
 
-# Start the application using Gunicorn (bind to 0.0.0.0:7860)
-CMD ["gunicorn", "voting_system.wsgi:application", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120"]
+# Start the application using start.sh
+CMD ["./start.sh"]
