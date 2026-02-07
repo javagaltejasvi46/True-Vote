@@ -76,6 +76,8 @@
 - **Voting**: Navigate to the homepage to see active elections.
 
 ## Deployment
+**Live Demo**: [Hugging Face Space](https://huggingface.co/spaces/tejasvijavagal/TrueVote)
+
 For instructions on how to deploy this project to the web, please read [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
