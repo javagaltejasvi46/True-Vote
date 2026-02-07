@@ -45,7 +45,7 @@ def register(request):
 def register_voter(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
-        form = VoterRegistrationForm(request.POST)
+        form = VoterProfileForm(request.POST)
         if form.is_valid():
             voter = form.save(commit=False)
             voter.user = user
@@ -54,7 +54,7 @@ def register_voter(request, user_id):
             messages.success(request, 'Registration successful!')
             return redirect('polls:index')
     else:
-        form = VoterRegistrationForm()
+        form = VoterProfileForm()
     
     return render(request, 'polls/register_voter.html', {'form': form})
 
