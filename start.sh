@@ -10,5 +10,5 @@ python initial_data.py
 echo "Collecting static files..."
 python manage.py collectstatic --no-input
 
-echo "Starting Server (Diagnostic Mode)..."
-exec python manage.py runserver 0.0.0.0:7860
+echo "Starting Gunicorn..."
+exec gunicorn voting_system.wsgi:application --bind 0.0.0.0:7860 --workers 2 --timeout 120

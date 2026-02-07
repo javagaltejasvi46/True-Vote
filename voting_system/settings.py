@@ -31,7 +31,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tejasvijavagal-truevote.hf.space',
     'https://huggingface.co',
     'https://*.hf.space'
+    'https://*.hf.space'
 ]
+
+# Trust the X-Forwarded-Proto header for identifying SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
