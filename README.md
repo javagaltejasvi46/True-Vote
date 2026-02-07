@@ -1,3 +1,14 @@
+---
+title: TrueVote
+emoji: 👀
+colorFrom: yellow
+colorTo: indigo
+sdk: docker
+pinned: false
+license: mit
+short_description: a voting application
+---
+
 # True Vote - Online Voting System
 
 > [!WARNING]
