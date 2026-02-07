@@ -79,17 +79,14 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'latest_poll_list'
 
     def get_queryset(self):
-        # Auto-archive: Mark past elections as inactive
+        # Auto-archive: Mark past elections as inactive efficiently
         today = timezone.now().date()
-        past_polls = Poll.objects.filter(
+        
+        # Use bulk update to avoid N+1 queries
+        Poll.objects.filter(
             pub_date__date__lt=today,
             is_active=True
-        )
-        
-        # Update past polls to inactive (auto-archive feature)
-        for poll in past_polls:
-            poll.is_active = False
-            poll.save()
+        ).update(is_active=False)
             
         # Get active polls excluding past elections
         return Poll.objects.filter(
@@ -135,20 +132,12 @@ def vote(request, poll_id):
         messages.error(request, 'You have already voted in this election.')
         return redirect('polls:results', pk=poll.id)
     
-    # Check if user is a voter or create a voter profile if needed
-    try:
-        voter, created = Voter.objects.get_or_create(
-            user=user,
-            defaults={
-                'name': user.get_full_name() or user.username,
-                'age': 18,  # Default age
-                'srn': f"SRN-{user.id}",  # Generate a default SRN
-                'sex': 'O',  # Default gender (Other)
-            }
-        )
-    except Exception as e:
-        messages.error(request, f'Error creating or retrieving voter profile: {str(e)}')
-        return render(request, 'polls/detail.html', {'poll': poll})
+    # Check if user is a voter
+    if not hasattr(user, 'voter'):
+        messages.error(request, 'You need to complete your voter registration profile before voting.')
+        return redirect('polls:register_voter', user_id=user.id)
+    
+    voter = user.voter
     
     if request.method == 'POST':
         try:
@@ -163,10 +152,16 @@ def vote(request, poll_id):
             choice_id = request.POST['choice']
             selected_choice = poll.choices.get(pk=choice_id)
             
-            # Use database transaction to ensure atomicity (all or nothing)
+            # Use database transaction to ensure atomicity
             with transaction.atomic():
-                # Increment the choice's vote count
-                selected_choice.votes += 1
+                # Re-check vote status inside transaction to be safe
+                if Vote.objects.filter(poll=poll, voter=voter).exists():
+                    messages.error(request, 'You have already voted in this election.')
+                    return redirect('polls:results', pk=poll.id)
+
+                # Increment the choice's vote count atomically using F-expression
+                # This prevents race conditions under high concurrency
+                selected_choice.votes = models.F('votes') + 1
                 selected_choice.save()
                 
                 # Record the vote
@@ -254,40 +249,49 @@ def add_candidate(request):
         
     if request.method == 'POST':
         name = request.POST.get('name')
-        age = request.POST.get('age')
+        age_str = request.POST.get('age')
         sex = request.POST.get('sex')
         position = request.POST.get('position')
         
-        if name and age and sex and position:
+        if name and age_str and sex and position:
+            try:
+                age = int(age_str)
+            except ValueError:
+                messages.error(request, 'Age must be a valid number.')
+                return redirect('polls:create')
+
             # Create a new user for the candidate
             username = name.lower().replace(' ', '_')
-            # Check if username exists, add a number if it does
-            base_username = username
-            counter = 1
-            while User.objects.filter(username=username).exists():
-                username = f"{base_username}_{counter}"
-                counter += 1
-                
-            # Create random password - in production you'd want to send this to the candidate
+            
+            # Robust username generation to prevent collision race conditions
             import random
             import string
-            password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-            
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                email=f"{username}@example.com"  # Placeholder email
-            )
-            
-            # Create the candidate profile
-            Candidate.objects.create(
-                user=user,
-                name=name,
-                age=int(age),
-                sex=sex,
-                position=position,
-                is_candidate=True
-            )
+            from django.db import IntegrityError
+
+            while True:
+                # Create random password
+                password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+                try:
+                    with transaction.atomic():
+                        user = User.objects.create_user(
+                            username=username,
+                            password=password,
+                            email=f"{username}@example.com"
+                        )
+                        # Create the candidate profile
+                        Candidate.objects.create(
+                            user=user,
+                            name=name,
+                            age=age,
+                            sex=sex,
+                            position=position,
+                            is_candidate=True
+                        )
+                    break # Success, exit loop
+                except IntegrityError:
+                    # Username taken, append random suffix and retry
+                    suffix = ''.join(random.choices(string.digits, k=4))
+                    username = f"{name.lower().replace(' ', '_')}_{suffix}"
             
             messages.success(request, f'Candidate {name} added successfully! Username: {username}, Password: {password}')
             return redirect('polls:create')
@@ -431,21 +435,29 @@ def election_stats(request):
             
             dept_polls[dept].append(poll_data)
     
-    # Create simulated participation data
-    # In a real application, you would calculate this from actual data
+    # Calculate REAL participation data
     participation_data = {
         'departments': departments,
         'participation': []
     }
     
-    # Generate sample participation rates between 20% and 85%
-    import random
+    total_registered_voters = Voter.objects.count()
+    
     for dept in departments:
-        if dept in dept_polls:
-            # For departments with elections, use somewhat realistic data
-            participation_data['participation'].append(random.randint(30, 85))
+        if dept in dept_polls and total_registered_voters > 0:
+            # Aggregate total votes for all polls in this department
+            # Note: This is an approximation since voters aren't strictly linked to departments
+            # A more accurate metric would be (Unique Voters in Dept Polls / Total Voters)
+            dept_vote_count = 0
+            for poll_data in dept_polls[dept]:
+                # Sum the votes from the chart data we already prepared
+                dept_vote_count += sum(poll_data['chart_data']['votes'])
+            
+            # Use max participation to avoid >100% if voters vote in multiple polls
+            # ideally we'd query distinct voters, but this is a solid improvement over random
+            participation_rate = round((dept_vote_count / (total_registered_voters * len(dept_polls[dept]) or 1)) * 100, 1)
+            participation_data['participation'].append(min(participation_rate, 100))
         else:
-            # For departments without elections, use zero or low participation
             participation_data['participation'].append(0)
     
     # Handle empty departments
