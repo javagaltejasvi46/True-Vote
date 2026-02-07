@@ -27,7 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['https://tejasvijavagal-truevote.hf.space']
+CSRF_TRUSTED_ORIGINS = [
+    'https://tejasvijavagal-truevote.hf.space',
+    'https://huggingface.co',
+    'https://*.hf.space'
+]
 
 
 # Application definition
